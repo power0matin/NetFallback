@@ -1,0 +1,34 @@
+name: Update NetFallback release notes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'RELEASE-NOTES-v0.1.0.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: netfallback-release-notes
+  cancel-in-progress: false
+
+jobs:
+  update-release:
+    name: Update published v0.1.0 description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Update GitHub Release description
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release edit v0.1.0 \
+            --repo "$GH_REPO" \
+            --title "NetFallback v0.1.0 — Complete offline backup bundle" \
+            --notes-file RELEASE-NOTES-v0.1.0.md
