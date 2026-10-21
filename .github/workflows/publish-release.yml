@@ -1,11 +1,13 @@
 name: Publish NetFallback release
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Build offline backup bundle
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - '.github/workflows/publish-release.yml'
   workflow_dispatch:
     inputs:
       tag:
@@ -24,6 +26,7 @@ concurrency:
 
 jobs:
   publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Validate and publish complete bundle
     runs-on: windows-latest
     timeout-minutes: 180
