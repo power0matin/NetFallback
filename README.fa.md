@@ -1,127 +1,99 @@
 # NetFallback
 
-**ابزار آماده‌سازی پشتیبان اتصال: دانلود نسخه‌ها، آرشیو سورس و آمادگی آفلاین**
+**مجموعهٔ پشتیبان اتصال برای روزهای اختلال اینترنت** — دریافت نسخه‌های رسمی، آرشیو سورس و نگهداری محلی فایل‌ها و فراداده.
 
-`NetFallback` کمک می‌کند پیش از اختلال اینترنت، نسخه‌های رسمی برخی ابزارهای اتصال جایگزین، آرشیو کد منبع، نسخه محلی تنظیمات منتخب و فراداده و هش فایل‌ها را جمع‌آوری کنی. این پروژه ابزار دانلود و آرشیو است؛ **تضمین نمی‌کند** که هیچ پروتکل یا تونلی روی همه اپراتورها یا هنگام قطع کامل مسیر بین‌الملل کار کند.
+[![CI](https://github.com/power0matin/NetFallback/actions/workflows/ci.yml/badge.svg)](https://github.com/power0matin/NetFallback/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/power0matin/NetFallback?display_name=tag)](https://github.com/power0matin/NetFallback/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[English README](README.md) · [فهرست منابع](sources.json) · [امنیت](SECURITY.md) · [یادداشت پروتکل‌ها](docs/protocols.fa.md)
+## دانلود اصلی
 
-## امکانات
+**[دانلود بستهٔ کامل NetFallback — همهٔ فایل‌های پشتیبان در یک ZIP](https://github.com/power0matin/NetFallback/releases/latest/download/NetFallback-All.zip)**
 
-- دریافت آخرین Release منتشرشده از API رسمی GitHub به‌جای تکیه بر لینک‌های ثابت.
-- دانلود پکیج‌های منتخب Windows و Android و امضا/هش همراه، در صورت انتشار.
-- آرشیو سورس با شناسه commit مشخص تا فایل منبع به نسخه‌ای قابل‌ردیابی مربوط باشد.
-- ذخیره متادیتا، گزارش اجرا و SHA-256 محلی.
-- نگهداری فایل‌های حجیم، اجرایی و کانفیگ‌های متغیر خارج از Git.
-- بررسی خودکار ساختار manifest با تست و GitHub Actions.
+این لینک همیشه به فایل اصلی آخرین Release اشاره می‌کند. بستهٔ کامل شامل فایل‌های منتخب Windows و Android، آرشیو سورس پروژه‌ها، snapshot تنظیمات منتخب، گزارش دانلود، فهرست SHA-256 و راهنمای فارسی است. حجم بسته با نسخه‌ها و فایل‌های بالادستی تغییر می‌کند؛ برای نسخهٔ نخست حدود ۱٫۲ گیگابایت در نظر بگیر.
 
-## شروع سریع در ویندوز
+برای مشاهدهٔ checksum بسته و راهنمای مستقل، [صفحهٔ آخرین Release](https://github.com/power0matin/NetFallback/releases/latest) را ببین.
 
-نیازمندی‌ها: Windows 10/11، PowerShell 7 یا بالاتر، `curl.exe` برای دانلود قابل ادامه و در صورت انتشار ریپو Git، GitHub CLI (`gh`).
+## شروع سریع
 
-در پوشه پروژه اجرا کن:
+1. بستهٔ کامل را از لینک بالا دریافت کن و ZIP را در پوشه‌ای با فضای کافی استخراج کن.
+2. فایل **GUIDE.fa.md** را باز کن؛ نسخهٔ آن داخل بستهٔ کامل نیز قرار دارد.
+3. فایل‌ها را از پوشهٔ مربوط به سیستم‌عامل یا نوع داده پیدا کن. NetFallback چیزی را خودکار نصب یا اجرا نمی‌کند.
+4. پیش از استفاده از فایل‌های حساس، هش‌ها و دستورالعمل رسمی پروژهٔ سازنده را بررسی کن.
 
-```powershell
-pwsh -NoProfile -File .\scripts\backup.ps1
-```
-
-اسکریپت فایل‌های منتخب ویندوز و اندروید، آرشیو سورس و snapshot تنظیمات را دریافت می‌کند؛ حجم پیش‌فرض می‌تواند چندصد مگابایت باشد و دریافت همه معماری‌ها حجم را بیشتر می‌کند. **هیچ برنامه‌ای را اجرا یا نصب نمی‌کند.**
-
-### انتخاب نوع دانلود
-
-```powershell
-# فقط بسته‌های ویندوز
-pwsh -NoProfile -File .\scripts\backup.ps1 -Category Windows
-
-# فقط بسته‌های اندروید
-pwsh -NoProfile -File .\scripts\backup.ps1 -Category Android
-
-# فقط سورس پروژه‌ها
-pwsh -NoProfile -File .\scripts\backup.ps1 -Category Source
-
-# به‌روزرسانی snapshot کانفیگ‌ها
-pwsh -NoProfile -File .\scripts\backup.ps1 -Category Configs
-
-# دریافت معماری‌های جایگزین؛ حجم بیشتر
-pwsh -NoProfile -File .\scripts\backup.ps1 -IncludeAlternateArchitectures
-
-# فقط نمایش کارهایی که انجام می‌شدند
-pwsh -NoProfile -File .\scripts\backup.ps1 -DryRun
-```
-
-اگر اتصال قطع شد، همان فرمان را دوباره اجرا کن. در دانلودهای بزرگ، اسکریپت از فایل موقت `.part` و در صورت وجود `curl.exe` از تلاش برای ادامه دانلود استفاده می‌کند.
-
-## پوشه‌های خروجی
+## محتویات بسته
 
 | مسیر | محتوا |
 | --- | --- |
-| `01-Android/` | APKها و بسته‌های اندروید |
-| `02-Windows/` | بسته‌های ویندوز |
-| `03-Source-Code/` | ZIP سورس با شناسه commit |
-| `04-Configs/` | snapshot تنظیمات متغیر؛ بدون اعتماد کورکورانه استفاده نشوند |
-| `05-Metadata/` | متادیتای Release و مخزن، کلیدهای عمومی و سوابق دانلود |
-| `DOWNLOAD-REPORT.txt` | گزارش آخرین اجرا |
-| `SHA256SUMS-local.txt` | هش محلی فایل‌های دانلودشده |
+| **01-Android/** | بسته‌های منتخب Android و فایل‌های امضا در صورت انتشار |
+| **02-Windows/** | بسته‌های منتخب Windows و فایل‌های امضا در صورت انتشار |
+| **03-Source-Code/** | آرشیو سورس پروژه‌ها، نام‌گذاری‌شده با شناسهٔ commit |
+| **04-Configs/** | snapshotهای منتخب و متغیر تنظیمات عمومی |
+| **05-Metadata/** | متادیتای Release و مخزن، کلیدهای عمومی و رکوردهای دانلود |
+| **DOWNLOAD-REPORT.txt** | نتیجهٔ دانلود و خطاهای احتمالی |
+| **SHA256SUMS-local.txt** | هش محلی فایل‌های آرشیوشده |
+| **NetFallback-download-manifest.json** | فهرست ماشینی خروجی و وضعیت دانلودها |
+| **مستندات** | راهنمای فارسی، README و یادداشت‌های پروتکل |
 
-این پوشه‌ها و فایل‌ها عمداً در `.gitignore` هستند. فایل اجرایی یا کانفیگ زنده را با `git add -f` وارد ریپوی عمومی نکن.
+نام و محتویات دقیق فایل‌ها با انتشار نسخه‌های جدید پروژه‌های بالادستی تغییر می‌کند؛ فهرست قواعد انتخاب در [sources.json](sources.json) نگهداری می‌شود.
 
-## منابع فعلی
+## دریافت انتخابی فایل‌ها از سورس
 
-قواعد دقیق انتخاب فایل در [`sources.json`](sources.json) است. نسخه فعلی هر نرم‌افزار هنگام اجرا از API گرفته می‌شود و در متن README ثابت نشده است.
+اگر کل بسته را نمی‌خواهی، سورس پروژه را دریافت کن و PowerShell 7 یا بالاتر را اجرا کن. باید GitHub و منابع بالادستی در دسترس باشند؛ وجود curl.exe برای ادامهٔ دانلودهای قطع‌شده توصیه می‌شود.
 
-- [PattNG](https://github.com/patterniha/PattNG)
-- [PattN](https://github.com/patterniha/PattN)
-- [MHRV Rust](https://github.com/therealaleph/MasterHttpRelayVPN-RUST)
-- [Aether](https://github.com/CluvexStudio/Aether)
-- [SNI-Spoofing](https://github.com/patterniha/SNI-Spoofing)
-- [SNI Spoofing Rust](https://github.com/therealaleph/sni-spoofing-rust)
-- [Serverless-for-Iran](https://github.com/patterniha/Serverless-for-Iran)
-- [Free-Configs](https://github.com/patterniha/Free-Configs)
+~~~powershell
+# شبیه‌سازی، بدون دریافت فایل
+pwsh -NoProfile -File .\scripts\backup.ps1 -DryRun
 
-این مجموعه، انتخاب اولیه و قابل‌گسترش است؛ به معنی تنها روش‌های موجود یا فعال‌بودن قطعی آن‌ها نیست. تغییر منابع از طریق PR و بازبینی `sources.json` انجام شود.
+# فقط بسته‌های Windows
+pwsh -NoProfile -File .\scripts\backup.ps1 -Category Windows
 
-## اصالت و امنیت
+# فقط بسته‌های Android
+pwsh -NoProfile -File .\scripts\backup.ps1 -Category Android
 
-- اگر GitHub Releases مقدار `digest` از نوع SHA-256 منتشر کرده باشد، اسکریپت آن را با فایل دانلودشده مقایسه می‌کند. این کار فساد فایل را تشخیص می‌دهد، اما چون هش از همان منبع گرفته می‌شود، به‌تنهایی اثبات مستقل سالم‌بودن فایل نیست.
-- فایل‌های امضا در صورت وجود دانلود می‌شوند، اما بررسی امضای رمزنگاری‌شده خودکار نیست؛ کلید معتبر و فرمت امضا به هر پروژه وابسته است.
-- هش‌های `SHA256SUMS-local.txt` محلی‌اند و جای امضای ناشر را نمی‌گیرند.
-- اسکریپت هیچ فایل دانلودشده‌ای را اجرا نمی‌کند.
-- کانفیگ‌ها ممکن است شامل endpointهای کوتاه‌عمر یا اطلاعات اتصال باشند. آن‌ها را ورودی غیرقابل اعتماد فرض کن، قبل از استفاده بررسی کن و در ریپوی عمومی منتشر نکن.
-- دسترس‌پذیربودن لینک دانلود، اثبات نمی‌کند که روش در اپراتور تو فعال است.
+# فقط آرشیو سورس
+pwsh -NoProfile -File .\scripts\backup.ps1 -Category Source
 
-## تست و بررسی منابع
+# فقط snapshot تنظیمات منتخب
+pwsh -NoProfile -File .\scripts\backup.ps1 -Category Configs
 
-```powershell
+# معماری‌های جایگزین؛ حجم بیشتر
+pwsh -NoProfile -File .\scripts\backup.ps1 -IncludeAlternateArchitectures
+~~~
+
+اگر دانلود قطع شد، همان فرمان را دوباره اجرا کن. اسکریپت تلاش می‌کند فایل‌های بزرگ ناقص را با curl.exe ادامه دهد و در پایان گزارش و هش محلی بسازد. برای دانلود با runner گیت‌هاب و بدون آپلود فایل از اینترنت خودت، در زبانهٔ [Actions](https://github.com/power0matin/NetFallback/actions) گزینهٔ **Build offline backup bundle** را اجرا کن.
+
+## چه چیزی را تضمین نمی‌کند؟
+
+NetFallback ابزار دریافت و آرشیو است، نه سرویس VPN و نه سامانهٔ سنجش لحظه‌ای اپراتورها. دانلودشدن یک برنامه یا کانفیگ نشان نمی‌دهد که آن روش اکنون روی اینترنت، اپراتور یا دستگاه تو کار می‌کند. اگر تمام مسیرهای لازم قطع باشند، نرم‌افزار سمت کاربر به‌تنهایی مسیر جدیدی ایجاد نمی‌کند.
+
+## اصالت فایل‌ها و امنیت
+
+- اگر GitHub Releases برای یک فایل مقدار digest از نوع SHA-256 منتشر کند، اسکریپت هش فایل دریافتی را با آن مقایسه می‌کند.
+- SHA256SUMS-local.txt هش محلی است و به‌تنهایی تأیید مستقل ناشر یا اثبات بی‌خطر بودن فایل نیست.
+- فایل امضا ممکن است موجود باشد، اما NetFallback امضاها را خودکار اعتبارسنجی نمی‌کند؛ روش تأیید رسمی هر پروژه را دنبال کن.
+- کانفیگ‌ها و endpointهای عمومی را ورودی غیرقابل‌اعتماد فرض کن و پیش از استفاده بررسی‌شان کن.
+- کلید خصوصی، اطلاعات ورود و کانفیگ محرمانه را در ریپوی عمومی یا Release منتشر نکن.
+- فایل‌های دانلودشده خودکار اجرا یا نصب نمی‌شوند.
+
+## مستندات و نگهداری
+
+- [راهنمای کامل فارسی](GUIDE.fa.md)
+- [یادداشت پروتکل‌ها — فارسی](docs/protocols.fa.md)
+- [Protocol notes — English](docs/protocols.md)
+- [فهرست و قواعد منابع](sources.json)
+- [سیاست امنیت](SECURITY.md)
+- [یادداشت‌های Release نخست](RELEASE-NOTES-v0.1.0.md)
+
+تست‌های آفلاین:
+
+~~~powershell
 python -m unittest discover -s tests -v
-python scripts/check_sources.py
-```
+python -m json.tool sources.json
+~~~
 
-GitHub Actions روی push و pull request تست‌های آفلاین را اجرا می‌کند؛ بررسی آنلاین منابع به‌صورت زمان‌بندی‌شده یا دستی اجرا می‌شود. اختلال موقت، rate limit یا مشکل upstream می‌تواند باعث شکست بررسی آنلاین شود.
+مجوز اسکریپت‌ها و مستندات اصلی NetFallback، MIT است؛ برای جزئیات و شرایط نرم‌افزارهای شخص ثالث، [LICENSE](LICENSE) و [NOTICE.md](NOTICE.md) را ببین.
 
-## انتشار ریپو
+---
 
-برای ایجاد `power0matin/NetFallback`، Git و GitHub CLI را نصب کن، با `gh auth login` وارد حساب شو و از ریشه پروژه اجرا کن:
-
-```powershell
-pwsh -NoProfile -File .\scripts\publish.ps1 -Owner power0matin -Visibility public
-```
-
-اسکریپت از تغییر خودکار `origin` موجود که به ریپوی دیگری اشاره کند خودداری می‌کند. قبل از انتشار `git status` را بررسی کن. فایل‌های نادیده‌گرفته‌شده وارد ریپو نمی‌شوند مگر این‌که خودت آن‌ها را به‌صورت اجباری اضافه کنی.
-
-## محدوده و سلب مسئولیت
-
-NetFallback پروژه‌ای مستقل است و وابستگی رسمی به پروژه‌های فهرست‌شده، GitHub، Cloudflare، Google یا اپراتورها ندارد. ابزارهای دور زدن محدودیت به زیرساخت قابل‌دسترسی وابسته‌اند و ممکن است بدون اطلاع از کار بیفتند. قوانین قابل‌اعمال، ریسک محلی و مجوز پروژه‌ها را رعایت کن. این ریپو راهنمای آماده‌سازی است، نه تضمین دسترسی، ناشناس‌ماندن یا امنیت مطلق.
-
-## مجوز
-
-اسکریپت‌ها و مستندات اصیل NetFallback تحت MIT منتشر می‌شوند؛ جزئیات در [`LICENSE`](LICENSE). نرم‌افزار شخص ثالث و علائم تجاری آن همچنان تابع مجوز و مالک اصلی هستند؛ [NOTICE.md](NOTICE.md) را ببین.
-
-## دریافت آرشیو پشتیبان از طریق GitHub Actions
-
-وارد زبانه Actions شو و Workflow با نام **Build offline backup bundle** را اجرا کن.
-دسته موردنیاز را انتخاب کن و پس از پایان اجرا، Artifact را دانلود کن.
-
-فایل‌های حجیم مستقیماً توسط Runner گیت‌هاب دریافت می‌شوند؛ بنابراین
-نیازی نیست آن‌ها را از اینترنت خودت به GitHub آپلود کنی.
-Artifact موقتی است؛ برای نگهداری بلندمدت، آن را دانلود و روی حافظه جداگانه ذخیره کن.
-اطلاعات ورود، کلیدهای شخصی یا کانفیگ خصوصی را در Artifact مخزن عمومی قرار نده.
+NetFallback پروژه‌ای مستقل است و وابستگی رسمی به سازندگان ابزارهای فهرست‌شده، GitHub، Cloudflare یا اپراتورها ندارد. قوانین قابل‌اعمال، مجوز پروژه‌ها و خطرات استفاده از نرم‌افزارهای شخص ثالث را در نظر بگیر.
