@@ -1,6 +1,11 @@
 name: Publish NetFallback release
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-release.yml'
   workflow_run:
     workflows:
       - Build offline backup bundle
@@ -9,12 +14,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Release tag to publish or update
-        required: true
-        type: string
-        default: v0.1.0
 
 permissions:
   contents: write
@@ -184,12 +183,30 @@ jobs:
           Write-Host "ZIP size: $((Get-Item -LiteralPath $zipPath).Length) bytes"
           Write-Host "ZIP SHA-256: $hash"
 
+      - name: Clean up malformed untagged release from an earlier attempt
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $repo = $env:GITHUB_REPOSITORY
+          $response = gh api "repos/$repo/releases?per_page=100" | ConvertFrom-Json
+          $malformed = @($response | Where-Object {
+            $_.tag_name -like 'untagged-*' -and $_.name -like 'NetFallback*Complete offline backup bundle*'
+          })
+          foreach ($release in $malformed) {
+            Write-Warning "Removing malformed release $($release.tag_name)."
+            gh api -X DELETE "repos/$repo/releases/$($release.id)"
+            if ($LASTEXITCODE -ne 0) { throw "Could not delete malformed release $($release.id)." }
+            gh api -X DELETE "repos/$repo/git/refs/tags/$($release.tag_name)"
+            if ($LASTEXITCODE -ne 0) { Write-Warning "Release deleted, but tag ref cleanup failed for $($release.tag_name)." }
+          }
+
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ inputs.tag || 'v0.1.0' }}
+          tag_name: v0.1.0
           target_commitish: main
-          name: NetFallback ${{ inputs.tag || 'v0.1.0' }} — Complete offline backup bundle
+          name: NetFallback v0.1.0 — Complete offline backup bundle
           body_path: RELEASE-NOTES-v0.1.0.md
           files: |
             release-assets/NetFallback-All.zip
