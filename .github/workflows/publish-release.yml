@@ -1,0 +1,198 @@
+name: Publish NetFallback release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-release.yml'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish or update
+        required: true
+        type: string
+        default: v0.1.0
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: netfallback-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Validate and publish complete bundle
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Find latest successful full backup artifact
+        id: backup
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $repo = $env:GITHUB_REPOSITORY
+          $response = gh api "repos/$repo/actions/artifacts?per_page=100" | ConvertFrom-Json
+          $candidates = @($response.artifacts |
+            Where-Object { $_.name -match '^NetFallback-All-[0-9]+$' -and -not $_.expired } |
+            Sort-Object created_at -Descending)
+
+          $selected = $null
+          foreach ($candidate in $candidates) {
+            if (-not $candidate.workflow_run -or -not $candidate.workflow_run.id) { continue }
+            try {
+              $run = gh api "repos/$repo/actions/runs/$($candidate.workflow_run.id)" | ConvertFrom-Json
+            } catch {
+              Write-Warning "Could not inspect candidate run $($candidate.workflow_run.id): $_"
+              continue
+            }
+
+            if ($run.name -eq 'Build offline backup bundle' -and
+                $run.conclusion -eq 'success' -and
+                $run.head_branch -eq 'main') {
+              $selected = $candidate
+              break
+            }
+          }
+
+          if (-not $selected) {
+            throw 'No unexpired successful NetFallback-All artifact was found. Run Build offline backup bundle successfully first.'
+          }
+
+          "backup_run_id=$($selected.workflow_run.id)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          "backup_artifact_name=$($selected.name)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          Write-Host "Selected $($selected.name) from successful run $($selected.workflow_run.id)."
+
+      - name: Download and validate backup artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BACKUP_RUN_ID: ${{ steps.backup.outputs.backup_run_id }}
+          BACKUP_ARTIFACT_NAME: ${{ steps.backup.outputs.backup_artifact_name }}
+        run: |
+          $bundle = Join-Path $env:GITHUB_WORKSPACE 'release-workspace'
+          New-Item -ItemType Directory -Force -Path $bundle | Out-Null
+
+          gh run download $env:BACKUP_RUN_ID --repo $env:GITHUB_REPOSITORY --name $env:BACKUP_ARTIFACT_NAME --dir $bundle
+          if ($LASTEXITCODE -ne 0) { throw 'Could not download the selected Actions artifact.' }
+
+          $manifestPath = Join-Path $bundle 'NetFallback-download-manifest.json'
+          $checksumPath = Join-Path $bundle 'SHA256SUMS-local.txt'
+          $reportPath = Join-Path $bundle 'DOWNLOAD-REPORT.txt'
+          foreach ($required in @($manifestPath, $checksumPath, $reportPath)) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Required backup report is missing: $required"
+            }
+          }
+
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+          if ($manifest.failed -ne 0 -or $manifest.downloaded -le 0) {
+            throw "Backup manifest is not clean (downloaded=$($manifest.downloaded), failed=$($manifest.failed))."
+          }
+
+          $verified = 0
+          foreach ($line in Get-Content -LiteralPath $checksumPath -Encoding utf8) {
+            if ($line -notmatch '^(?<hash>[A-Fa-f0-9]{64})  (?<path>.+)$') { continue }
+            $relativePath = $Matches.path
+            $expected = $Matches.hash.ToLowerInvariant()
+            $filePath = Join-Path $bundle $relativePath
+            if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) {
+              throw "Checksum inventory refers to a missing file: $relativePath"
+            }
+            $actual = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $expected) {
+              throw "Checksum verification failed: $relativePath"
+            }
+            $verified++
+          }
+          if ($verified -le 0) { throw 'No entries in SHA256SUMS-local.txt were verified.' }
+          Write-Host "Verified $verified files against the local checksum inventory."
+
+      - name: Add documentation and package release asset
+        shell: pwsh
+        run: |
+          $bundle = Join-Path $env:GITHUB_WORKSPACE 'release-workspace'
+          $releaseDir = Join-Path $env:GITHUB_WORKSPACE 'release-assets'
+          New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+
+          $rootDocs = @('README.md', 'README.fa.md', 'GUIDE.fa.md', 'LICENSE', 'NOTICE.md', 'SECURITY.md', 'sources.json', 'RELEASE-NOTES-v0.1.0.md')
+          foreach ($name in $rootDocs) {
+            $source = Join-Path $env:GITHUB_WORKSPACE $name
+            if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing documentation file: $name" }
+            Copy-Item -LiteralPath $source -Destination (Join-Path $bundle $name) -Force
+          }
+
+          $docsDir = Join-Path $bundle 'docs'
+          New-Item -ItemType Directory -Force -Path $docsDir | Out-Null
+          foreach ($name in @('protocols.md', 'protocols.fa.md')) {
+            $source = Join-Path $env:GITHUB_WORKSPACE (Join-Path 'docs' $name)
+            if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing protocol documentation: $name" }
+            Copy-Item -LiteralPath $source -Destination (Join-Path $docsDir $name) -Force
+          }
+
+          $start = @(
+            'NetFallback — شروع از اینجا',
+            '',
+            '۱. برای معرفی پروژه README.fa.md را بخوان.',
+            '۲. برای دانلود، استخراج، بررسی هش و عیب‌یابی GUIDE.fa.md را باز کن.',
+            '۳. فایل‌های Windows و Android در پوشه‌های مربوط قرار دارند.',
+            '۴. کانفیگ‌ها و فایل‌های اجرایی را قبل از استفاده بررسی کن؛ هیچ فایل خودکار اجرا نمی‌شود.',
+            '',
+            'این بسته آرشیو فایل‌ها است و تضمین کارکرد هیچ روش اتصال را نمی‌دهد.'
+          )
+          $start | Set-Content -LiteralPath (Join-Path $bundle 'START-HERE.fa.txt') -Encoding utf8
+
+          $zipPath = Join-Path $releaseDir 'NetFallback-All.zip'
+          if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+          Add-Type -AssemblyName System.IO.Compression
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            $bundle,
+            $zipPath,
+            [System.IO.Compression.CompressionLevel]::NoCompression,
+            $false
+          )
+
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+          try {
+            $entryCount = $archive.Entries.Count
+            if ($entryCount -lt 50) { throw "Release ZIP looks incomplete: only $entryCount entries." }
+            foreach ($required in @('README.fa.md', 'GUIDE.fa.md', 'START-HERE.fa.txt', 'SHA256SUMS-local.txt', 'NetFallback-download-manifest.json')) {
+              if (-not ($archive.Entries | Where-Object { $_.FullName -eq $required })) {
+                throw "Release ZIP is missing required entry: $required"
+              }
+            }
+          } finally {
+            $archive.Dispose()
+          }
+
+          $hash = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  NetFallback-All.zip" | Set-Content -LiteralPath (Join-Path $releaseDir 'NetFallback-All.zip.sha256') -Encoding ascii
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'GUIDE.fa.md') -Destination (Join-Path $releaseDir 'GUIDE.fa.md') -Force
+
+          Write-Host "Prepared $zipPath"
+          Write-Host "ZIP entries: $entryCount"
+          Write-Host "ZIP size: $((Get-Item -LiteralPath $zipPath).Length) bytes"
+          Write-Host "ZIP SHA-256: $hash"
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag || 'v0.1.0' }}
+          target_commitish: main
+          name: NetFallback ${{ inputs.tag || 'v0.1.0' }} — Complete offline backup bundle
+          body_path: RELEASE-NOTES-v0.1.0.md
+          files: |
+            release-assets/NetFallback-All.zip
+            release-assets/NetFallback-All.zip.sha256
+            release-assets/GUIDE.fa.md
+          fail_on_unmatched_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
