@@ -52,17 +52,21 @@ jobs:
           BACKUP_CATEGORY: ${{ inputs.category }}
           INCLUDE_ALTERNATE_ARCHITECTURES: ${{ inputs.include_alternate_architectures }}
         run: |
+          $category = $env:BACKUP_CATEGORY
+          if ([string]::IsNullOrWhiteSpace($category)) {
+            $category = 'All'
+          }
+          
           $arguments = @(
             '-NoProfile',
             '-File', '.\scripts\backup.ps1',
-            '-Category', $env:BACKUP_CATEGORY
+            '-Category', $category
           )
-
+          
           if ($env:INCLUDE_ALTERNATE_ARCHITECTURES -eq 'true') {
             $arguments += '-IncludeAlternateArchitectures'
           }
-
-          & pwsh @arguments
+                    & pwsh @arguments
 
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
@@ -72,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: NetFallback-${{ inputs.category }}-${{ github.run_number }}
+          name: NetFallback-${{ inputs.category || 'All' }}-${{ github.run_number }}
           path: |
             01-Android/**
             02-Windows/**
