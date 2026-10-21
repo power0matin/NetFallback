@@ -330,17 +330,20 @@ $Summary | Set-Content -LiteralPath $ReportPath -Encoding utf8
 
 if (-not $DryRun) {
     $ChecksumPath = Join-Path $Root 'SHA256SUMS-local.txt'
-    $HashLines = foreach ($File in Get-ChildItem -LiteralPath $Root -File -Recurse | Where-Object {
-        $_.FullName -ne $ChecksumPath -and $_.FullName -ne $ReportPath -and
-        $_.Name -notlike '*.part' -and $_.Name -notlike '*.part.meta.json' -and
-        $_.Name -notlike '*.download.json' -and $_.FullName -notmatch '[\\/]\.git[\\/]'
-    }) {
-        try {
-            $Hash = Get-Sha256 -Path $File.FullName
-            $Relative = $File.FullName.Substring($Root.Length).TrimStart([char[]]@('\','/'))
-            "$Hash  $Relative"
+    $HashLines = foreach ($Directory in $Directories) {
+        $DirectoryPath = Join-Path $Root $Directory
+        foreach ($File in Get-ChildItem -LiteralPath $DirectoryPath -File -Recurse | Where-Object {
+            $_.Name -ne '.gitkeep' -and
+            $_.Name -notlike '*.part' -and $_.Name -notlike '*.part.meta.json' -and
+            $_.Name -notlike '*.download.json'
+        }) {
+            try {
+                $Hash = Get-Sha256 -Path $File.FullName
+                $Relative = $File.FullName.Substring($Root.Length).TrimStart([char[]]@('\','/'))
+                "$Hash  $Relative"
+            }
+            catch { "HASH_FAILED  $($File.FullName)" }
         }
-        catch { "HASH_FAILED  $($File.FullName)" }
     }
     $HashLines | Set-Content -LiteralPath $ChecksumPath -Encoding utf8
 
