@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "project": "NetFallback",
+  "updatedBy": "scripts/backup.ps1",
+  "notes": [
+    "Repository metadata is fetched from GitHub at runtime; do not pin current versions here.",
+    "Release asset include patterns are regexes matched against the official asset name.",
+    "Config snapshots are mutable and are saved locally only; they are not committed to Git."
+  ],
+  "sources": [
+    {
+      "id": "pattng",
+      "name": "PattNG",
+      "repository": "patterniha/PattNG",
+      "purpose": "Android client; includes project-provided Aether-related workflows.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Android",
+          "directory": "01-Android/PattNG",
+          "include": [
+            "(?i)^PattNG_.*_(arm64-v8a|universal)\\.apk(\\.sig)?$"
+          ],
+          "alternateInclude": [
+            "(?i)^PattNG_.*\\.apk(\\.sig)?$"
+          ]
+        },
+        {
+          "category": "Android",
+          "directory": "05-Metadata/keys",
+          "include": [
+            "(?i)^PattNG-public-key\\.asc$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pattn",
+      "name": "PattN",
+      "repository": "patterniha/PattN",
+      "purpose": "Desktop client; default selection targets Windows x64 packages.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Windows",
+          "directory": "02-Windows/PattN",
+          "include": [
+            "(?i)^PattN-windows-64(-desktop)?\\.zip(\\.sig)?$"
+          ],
+          "alternateInclude": [
+            "(?i)^PattN-windows-.*\\.(zip|sig)$"
+          ]
+        },
+        {
+          "category": "Windows",
+          "directory": "05-Metadata/keys",
+          "include": [
+            "(?i)^PattN-public-key\\.asc$"
+          ],
+          "alternateInclude": [
+            "(?i)^PattN-public-key\\.asc$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mhrv-rust",
+      "name": "MHRV Rust",
+      "repository": "therealaleph/MasterHttpRelayVPN-RUST",
+      "purpose": "Relay-based client with Android and Windows builds.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Android",
+          "directory": "01-Android/MHRV-Rust",
+          "include": [
+            "(?i)^mhrv-rs-android-(arm64-v8a|universal)-.*\\.apk$"
+          ],
+          "alternateInclude": [
+            "(?i)^mhrv-rs-android-.*\\.apk$"
+          ]
+        },
+        {
+          "category": "Windows",
+          "directory": "02-Windows/MHRV-Rust",
+          "include": [
+            "(?i)^mhrv-rs-windows-amd64\\.zip$"
+          ],
+          "alternateInclude": [
+            "(?i)^mhrv-rs-windows-.*\\.zip$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aether",
+      "name": "Aether",
+      "repository": "CluvexStudio/Aether",
+      "purpose": "User-space proxy client builds; Android/Linux/Windows packages when available.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Android",
+          "directory": "01-Android/Aether",
+          "include": [
+            "(?i)^aether-android-arm64\\.tar\\.gz(\\.sha256)?$"
+          ],
+          "alternateInclude": [
+            "(?i)^aether-android-.*\\.(tar\\.gz|sha256)$"
+          ]
+        },
+        {
+          "category": "Windows",
+          "directory": "02-Windows/Aether",
+          "include": [
+            "(?i)^aether-windows-x86_64\\.zip(\\.sha256)?$"
+          ],
+          "alternateInclude": [
+            "(?i)^aether-windows-.*\\.(zip|sha256)$"
+          ]
+        },
+        {
+          "category": "Windows",
+          "directory": "05-Metadata/checksums",
+          "include": [
+            "(?i)^SHA256SUMS\\.txt$"
+          ],
+          "alternateInclude": [
+            "(?i)^SHA256SUMS\\.txt$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sni-spoofing",
+      "name": "SNI-Spoofing (original)",
+      "repository": "patterniha/SNI-Spoofing",
+      "purpose": "Original release archive, preserved for reference; inspect it carefully before use.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Windows",
+          "directory": "02-Windows/SNI-Spoofing",
+          "include": [
+            "(?i)^SNI-Spoofing_by_patterniha_.*\\.rar$"
+          ],
+          "alternateInclude": [
+            "(?i)\\.(rar|zip|exe|msi)$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sni-spoofing-rust",
+      "name": "SNI Spoofing Rust",
+      "repository": "therealaleph/sni-spoofing-rust",
+      "purpose": "Native SNI-spoofing tool release; Windows x64 package by default.",
+      "release": true,
+      "sourceArchive": true,
+      "assets": [
+        {
+          "category": "Windows",
+          "directory": "02-Windows/SNI-Spoofing-Rust",
+          "include": [
+            "(?i)^sni-spoof-rs-windows-amd64\\.zip$"
+          ],
+          "alternateInclude": [
+            "(?i)windows.*\\.(zip|exe|msi)$"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "serverless-for-iran",
+      "name": "Serverless-for-Iran",
+      "repository": "patterniha/Serverless-for-Iran",
+      "purpose": "Source archive and selected public config snapshots. Snapshots may change or expire.",
+      "release": false,
+      "sourceArchive": true,
+      "assets": []
+    },
+    {
+      "id": "free-configs",
+      "name": "Free-Configs",
+      "repository": "patterniha/Free-Configs",
+      "purpose": "Source archive and selected public configuration snapshots. Treat configs as untrusted.",
+      "release": false,
+      "sourceArchive": true,
+      "assets": []
+    },
+    {
+      "id": "mhrv-original",
+      "name": "MasterHttpRelayVPN (original)",
+      "repository": "masterking32/MasterHttpRelayVPN",
+      "purpose": "Original project source and documentation archive.",
+      "release": false,
+      "sourceArchive": true,
+      "assets": []
+    }
+  ],
+  "configSnapshots": [
+    {
+      "id": "serverless-json",
+      "name": "Serverless-for-Iran.json",
+      "url": "https://raw.githubusercontent.com/patterniha/Serverless-for-Iran/main/Subscription/Serverless-for-Iran.json",
+      "directory": "04-Configs/Serverless-for-Iran",
+      "securityNote": "Mutable third-party proxy/config data; inspect before use and never publish in this repository."
+    },
+    {
+      "id": "serverless-frag-a",
+      "name": "Serverless-fragA.jsonc",
+      "url": "https://raw.githubusercontent.com/patterniha/Serverless-for-Iran/main/Serverless-fragA.jsonc",
+      "directory": "04-Configs/Serverless-for-Iran",
+      "securityNote": "Mutable third-party config snapshot; do not assume endpoints continue to work."
+    },
+    {
+      "id": "serverless-frag-b",
+      "name": "Serverless-fragB.jsonc",
+      "url": "https://raw.githubusercontent.com/patterniha/Serverless-for-Iran/main/Serverless-fragB.jsonc",
+      "directory": "04-Configs/Serverless-for-Iran",
+      "securityNote": "Mutable third-party config snapshot; do not assume endpoints continue to work."
+    },
+    {
+      "id": "free-configs-base64",
+      "name": "configs_base64.txt",
+      "url": "https://raw.githubusercontent.com/patterniha/Free-Configs/main/configs_base64.txt",
+      "directory": "04-Configs/Free-Configs",
+      "securityNote": "Base64-encoded public configuration strings remain untrusted after decoding; never publish this snapshot."
+    },
+    {
+      "id": "free-configs",
+      "name": "configs.txt",
+      "url": "https://raw.githubusercontent.com/patterniha/Free-Configs/main/configs.txt",
+      "directory": "04-Configs/Free-Configs",
+      "securityNote": "Contains public configuration strings; handle as untrusted input."
+    }
+  ]
+}

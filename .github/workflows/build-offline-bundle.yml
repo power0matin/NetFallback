@@ -1,0 +1,87 @@
+﻿name: Build offline backup bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: Which category should be downloaded?
+        required: true
+        type: choice
+        default: All
+        options:
+          - All
+          - Android
+          - Windows
+          - Source
+          - Configs
+      include_alternate_architectures:
+        description: Download additional architecture variants (larger artifact).
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netfallback-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Download and package backup
+    runs-on: windows-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Download backup files
+        id: download
+        continue-on-error: true
+        shell: pwsh
+        env:
+          BACKUP_CATEGORY: ${{ inputs.category }}
+          INCLUDE_ALTERNATE_ARCHITECTURES: ${{ inputs.include_alternate_architectures }}
+        run: |
+          $arguments = @(
+            '-NoProfile',
+            '-File', '.\scripts\backup.ps1',
+            '-Category', $env:BACKUP_CATEGORY
+          )
+
+          if ($env:INCLUDE_ALTERNATE_ARCHITECTURES -eq 'true') {
+            $arguments += '-IncludeAlternateArchitectures'
+          }
+
+          & pwsh @arguments
+
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+      - name: Upload backup artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: NetFallback-${{ inputs.category }}-${{ github.run_number }}
+          path: |
+            01-Android/**
+            02-Windows/**
+            03-Source-Code/**
+            04-Configs/**
+            05-Metadata/**
+            DOWNLOAD-REPORT.txt
+            SHA256SUMS-local.txt
+            NetFallback-download-manifest.json
+          if-no-files-found: warn
+          retention-days: 90
+          compression-level: 0
+
+      - name: Report incomplete downloads
+        if: steps.download.outcome == 'failure'
+        shell: pwsh
+        run: |
+          Write-Error 'Some downloads failed. Inspect the uploaded artifact and DOWNLOAD-REPORT.txt.'
+          exit 1

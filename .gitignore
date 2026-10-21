@@ -1,0 +1,32 @@
+# Downloaded binaries, source archives, and mutable config snapshots stay local.
+/01-Android/*
+!/01-Android/.gitkeep
+/02-Windows/*
+!/02-Windows/.gitkeep
+/03-Source-Code/*
+!/03-Source-Code/.gitkeep
+/04-Configs/*
+!/04-Configs/.gitkeep
+/05-Metadata/*
+!/05-Metadata/.gitkeep
+
+/DOWNLOAD-REPORT.txt
+/SHA256SUMS-local.txt
+/NetFallback-download-manifest.json
+
+# PowerShell temporary/resume files and generated metadata
+*.part
+*.part.meta.json
+*.download.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

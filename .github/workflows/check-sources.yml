@@ -1,0 +1,29 @@
+name: Check upstream sources
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 7 * * 1,4'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-upstream-sources
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check declared repositories, latest releases, and snapshots
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/check_sources.py
