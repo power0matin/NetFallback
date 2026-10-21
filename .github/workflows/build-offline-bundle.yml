@@ -1,6 +1,13 @@
 ﻿name: Build offline backup bundle
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/backup.ps1'
+      - 'sources.json'
+      - '.github/workflows/build-offline-bundle.yml'
   workflow_dispatch:
     inputs:
       category:
