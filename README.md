@@ -3,7 +3,7 @@
 **An offline connectivity-preparation toolkit** for collecting official releases, source snapshots, selected configuration snapshots, and integrity metadata before an outage.
 
 <p align="center">
-  <a href="https://github.com/power0matin/NetFallback/releases/latest/download/NetFallback-All.zip"><img src="https://img.shields.io/github/downloads/power0matin/NetFallback/latest/NetFallback-All.zip?style=flat-square&amp;label=ZIP%20Downloads&amp;labelColor=18181B&amp;color=0EA5E9&amp;logo=github&amp;logoColor=white" alt="Full Bundle Downloads"/></a>
+  <a href="https://github.com/power0matin/NetFallback/releases/latest/download/NetFallback-All.zip"><img src="https://img.shields.io/github/downloads/power0matin/NetFallback/NetFallback-All.zip?style=flat-square&amp;label=ZIP%20Downloads&amp;labelColor=18181B&amp;color=0EA5E9&amp;logo=github&amp;logoColor=white" alt="Full Bundle Downloads"/></a>
   <a href="https://github.com/power0matin/NetFallback/releases/latest"><img src="https://img.shields.io/github/v/release/power0matin/NetFallback?style=flat-square&amp;label=Latest%20Release&amp;labelColor=18181B&amp;color=22C55E&amp;logo=github&amp;logoColor=white" alt="Latest Release"/></a>
   <a href="https://github.com/power0matin/NetFallback/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/power0matin/NetFallback/ci.yml?branch=main&amp;style=flat-square&amp;label=CI&amp;labelColor=18181B&amp;color=22C55E&amp;logo=github&amp;logoColor=white" alt="CI Status"/></a>
   <a href="https://hits.sh/github.com/power0matin/NetFallback/"><img src="https://hits.sh/github.com/power0matin/NetFallback.svg?style=flat-square&amp;label=Views&amp;labelColor=18181B&amp;color=0EA5E9&amp;logo=github" alt="Repository Views"/></a>
