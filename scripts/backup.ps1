@@ -260,7 +260,7 @@ function Save-SourceArchive {
         $BranchEscaped = [Uri]::EscapeDataString($Branch)
         $Commit = Invoke-GitHubApi -Uri "https://api.github.com/repos/$($Source.repository)/commits/$BranchEscaped"
         $Sha = [string]$Commit.sha
-        if ($Sha -notmatch '^[0-9a-fA-F]{40}$') { throw "Unexpected commit SHA returned for $Branch: $Sha" }
+        if ($Sha -notmatch '^[0-9a-fA-F]{40}$') { throw "Unexpected commit SHA returned for ${Branch}: $Sha" }
         $ShortSha = $Sha.Substring(0, 12).ToLowerInvariant()
         $Slug = $Source.id -replace '[^a-zA-Z0-9._-]', '-'
         $FileName = "$Slug-$ShortSha-source.zip"
